@@ -1,13 +1,14 @@
+import Button from '@mui/material/Button';
 import { useState } from "react";
 
-export default function Botoes({ botao }) {
-    const [input, setInput] = useState('');
-
-    const handleButtonClick = (value) => {
-        setInput(prevValue => prevValue + value);
-    };
+export default function Botoes({ valor }) {
 
     return (
-        <button style={{padding: '20px', fontSize: '30px'}} onClick={() => handleButtonClick(botao)}>{botao}</button>
+        <Button 
+            variant="outlined" 
+            sx={{ '&:hover': {backgroundColor: 'lightblue' }}}
+        >
+            {valor}
+        </Button>
     );
 }
