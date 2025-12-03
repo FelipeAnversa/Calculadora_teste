@@ -2,162 +2,139 @@ import Botoes from "./Botoes";
 import Stack from '@mui/material/Stack';
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 export default function Calculadora() {
+    const [display, setDisplay] = useState('0');
     const [primeiro, setPrimeiro] = useState(null);
     const [operador, setOperador] = useState('');
-    const [segundo, setSegundo] = useState(null);
-    const [res, setRes] = useState(null);
+    const [aguardandoSegundo, setAguardandoSegundo] = useState(false);
     
     function handleClick(valor) {
-        const resultado = calculadora(primeiro, operador, segundo, res, valor);
-        if (resultado === null) {
+        if (valor === 'C') {
+            setDisplay('0');
             setPrimeiro(null);
             setOperador('');
-            setSegundo(null);
-            setRes(null);
-        } else if (typeof resultado === 'number' || (typeof resultado === 'string' && !isNaN(resultado))) {
-            if (operador === '') {
-                setPrimeiro(Number(resultado));
+            setAguardandoSegundo(false);
+            return;
+        }
+        if (valor === 'D') {
+            if (display.length === 1) {
+                setDisplay('0');
             } else {
-                setSegundo(Number(resultado));
+                setDisplay(display.slice(0, -1));
             }
-        } else if (['+', '-', '*', '/'].includes(resultado)) {
-            setOperador(resultado);
-        } else {
-            if (segundo === null) {
-                setSegundo(resultado);
+            return;
+        }    
+        if (valor === '.') {
+            if (!display.includes('.')) {
+                setDisplay(display + '.');
+            }
+            return;
+        }
+        if (['+', '-', '*', '/'].includes(valor)) {
+            if (primeiro === null) {
+                setPrimeiro(parseFloat(display));
+                setOperador(valor);
+                setAguardandoSegundo(true);
+            } else if (aguardandoSegundo) {
+                setOperador(valor);
             } else {
+                const resultado = calcular(primeiro, parseFloat(display), operador);
                 setPrimeiro(resultado);
-                setOperador('');
-                setSegundo(null);
-                setRes(null);
+                setOperador(valor);
+                setDisplay(String(resultado));
+                setAguardandoSegundo(true);
+            }
+            return;
+        }
+        if (valor === '=') {
+            if (primeiro !== null && operador && !aguardandoSegundo) {
+                const resultado = calcular(primeiro, parseFloat(display), operador);
+                setDisplay(String(resultado));
+                setPrimeiro(resultado);
+                setAguardandoSegundo(true);
+            }
+            return;
+        }
+        if (['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(valor)) {
+            if (aguardandoSegundo) {
+                setDisplay(valor);
+                setAguardandoSegundo(false);
+            } else {
+                setDisplay(display === '0' ? valor : display + valor);
             }
         }
     }
+    
+    function calcular(a, b, op) {
+        switch (op) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return b !== 0 ? a / b : 'Erro';
+            default: return b;
+        }
+    }
+
+    const theme = createTheme({
+        palette: {
+            custom: {
+                black: '#000',
+            },
+        },
+    });
 
     return (
-        <div style={{textAlign: 'center'}}>
-            <Stack direction='column'>
+        <ThemeProvider theme={theme}>
+            <div style={{textAlign: 'center'}}>
+                <Stack direction='column' spacing={1}>
+                    <TextField
+                        variant='outlined'
+                        value={display}
+                        disabled
+                        sx={{
+                            width: '280px',
+                            fontSize: '30px',
+                        }}
+                    />
 
-                <TextField
-                    variant='outlined'
-                    disabled
-                    sx={{
-                        width: '256px',
-                        fontSize: '30px'
-                    }}
-                >
-                    {primeiro}{operador}{segundo}{res !== null ? `=${res}` : ''}
-                </TextField>
+                    <Stack direction='row' spacing={1}>
+                        <Botoes valor='' disabled={true} />
+                        <Botoes valor='C' handleClick={() => handleClick('C')} />
+                        <Botoes valor='D' handleClick={() => handleClick('D')} />
+                        <Botoes valor='/' handleClick={() => handleClick('/')} />
+                    </Stack>
+                    
+                    <Stack direction='row' spacing={1}>
+                        <Botoes valor='7' handleClick={() => handleClick('7')} />
+                        <Botoes valor='8' handleClick={() => handleClick('8')} />
+                        <Botoes valor='9' handleClick={() => handleClick('9')} />
+                        <Botoes valor='*' handleClick={() => handleClick('*')} />
+                    </Stack>
 
-                <Stack direction='row'>
-                    <Botoes valor='' />
-                    <Botoes valor='C' handleClick={() => handleClick('C')} />
-                    <Botoes valor='D' handleClick={() => handleClick('D')} />
-                    <Botoes valor='/' handleClick={() => handleClick('/')} />
-                </Stack>
-                
-                <Stack direction='row'>
-                    <Botoes valor='7' handleClick={() => handleClick('7')} />
-                    <Botoes valor='8' handleClick={() => handleClick('8')} />
-                    <Botoes valor='9' handleClick={() => handleClick('9')} />
-                    <Botoes valor='*' handleClick={() => handleClick('*')} />
-                </Stack>
+                    <Stack direction='row' spacing={1}>
+                        <Botoes valor='4' handleClick={() => handleClick('4')} />
+                        <Botoes valor='5' handleClick={() => handleClick('5')} />
+                        <Botoes valor='6' handleClick={() => handleClick('6')} />
+                        <Botoes valor='-' handleClick={() => handleClick('-')} />
+                    </Stack>
 
-                <Stack direction='row'>
-                    <Botoes valor='4' handleClick={() => handleClick('4')} />
-                    <Botoes valor='5' handleClick={() => handleClick('5')} />
-                    <Botoes valor='6' handleClick={() => handleClick('6')} />
-                    <Botoes valor='-' handleClick={() => handleClick('-')} />
-                </Stack>
+                    <Stack direction='row' spacing={1}>
+                        <Botoes valor='1' handleClick={() => handleClick('1')} />
+                        <Botoes valor='2' handleClick={() => handleClick('2')} />
+                        <Botoes valor='3' handleClick={() => handleClick('3')} />
+                        <Botoes valor='+' handleClick={() => handleClick('+')} />
+                    </Stack>
 
-                <Stack direction='row'>
-                    <Botoes valor='1' handleClick={() => handleClick('1')} />
-                    <Botoes valor='2' handleClick={() => handleClick('2')} />
-                    <Botoes valor='3' handleClick={() => handleClick('3')} />
-                    <Botoes valor='+' handleClick={() => handleClick('+')} />
+                    <Stack direction='row' spacing={1}>
+                        <Botoes valor='' disabled={true} />
+                        <Botoes valor='0' handleClick={() => handleClick('0')} />
+                        <Botoes valor='.' handleClick={() => handleClick('.')} />
+                        <Botoes valor='=' handleClick={() => handleClick('=')}/>
+                    </Stack>
                 </Stack>
-
-                <Stack direction='row'>
-                    <Botoes valor='' />
-                    <Botoes valor='0' handleClick={() => handleClick('0')} />
-                    <Botoes valor='.' handleClick={() => handleClick('.')} />
-                    <Botoes valor='=' handleClick={() => handleClick('=')}/>
-                </Stack>
-            </Stack>
-        </div>
+            </div>
+        </ThemeProvider>
     );
-}
-
-function calculadora(primeiro, operador, segundo, res, valor) {
-    if (primeiro === null) {
-        primeiro = valor;
-        return primeiro;
-    }
-    if (valor === '.') {
-        if (segundo !== null) {
-            segundo = String(segundo) + '.';
-            return segundo;
-        }
-        if (primeiro !== null) {
-            primeiro = String(primeiro) + '.';
-            return primeiro;
-        }
-    }
-    if (operador === '') {
-        operador = valor;
-        return operador;
-    }
-    if (segundo === null) {
-        segundo = valor;
-        return segundo;
-    }
-    if (valor === '.') {
-        if (segundo !== null) {
-            segundo = String(segundo) + '.';
-            return segundo;
-        }
-        if (primeiro !== null) {
-            primeiro = String(primeiro) + '.';
-            return primeiro;
-        }
-    }
-    if (valor === 'C') {
-        return null;
-    }
-    if (valor === 'D') {
-        if (segundo !== null) {
-            segundo = null;
-            return segundo;
-        }
-        if (operador !== '') {
-            operador = '';
-            return operador;
-        }
-        if (primeiro !== null) {
-            primeiro = null;
-            return primeiro;
-        }
-    }
-    if (valor === '=') {
-        if (primeiro !== null && operador !== '' && segundo !== null) {
-            switch (operador) {
-                case '+':
-                    res = primeiro + segundo;
-                    return res;
-                case '-':
-                    res = primeiro - segundo;
-                    return res;
-                case '*':
-                    res = primeiro * segundo;
-                    return res;
-                case '/':
-                    res = primeiro / segundo;
-                    return res;
-                default:
-                    break;
-            }
-        }
-    }
 }
