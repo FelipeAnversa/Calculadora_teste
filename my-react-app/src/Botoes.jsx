@@ -1,12 +1,11 @@
 import Button from '@mui/material/Button';
-import { useState } from "react";
 
-export default function Botoes({ valor }) {
-
+export default function Botoes({ valor, handleClick }) {
     return (
         <Button 
             variant="outlined" 
             sx={{ '&:hover': {backgroundColor: 'lightblue' }}}
+            onClick={handleClick}
         >
             {valor}
         </Button>
