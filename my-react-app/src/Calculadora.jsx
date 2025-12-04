@@ -87,7 +87,8 @@ export default function Calculadora() {
 
     return (
         <ThemeProvider theme={theme}>
-            <div style={{textAlign: 'center'}}>
+            <Stack direction='column' alignItems='center' spacing={2} sx={{ marginTop: '120px' }}>
+                <h1>Calculadora React</h1>
                 <Stack direction='column' spacing={1}>
                     <TextField
                         variant='outlined'
@@ -96,6 +97,11 @@ export default function Calculadora() {
                         sx={{
                             width: '280px',
                             fontSize: '30px',
+                            '& .MuiInputBase-input.Mui-disabled': {
+                                WebkitTextFillColor: theme.palette.custom.black,
+                                textAlign: 'right',
+                                fontSize: '30px',
+                            },
                         }}
                     />
 
@@ -134,7 +140,7 @@ export default function Calculadora() {
                         <Botoes valor='=' handleClick={() => handleClick('=')}/>
                     </Stack>
                 </Stack>
-            </div>
+            </Stack>
         </ThemeProvider>
     );
 }
